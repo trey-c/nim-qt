@@ -1,0 +1,9 @@
+build/
+.vscode/
+*.nims
+*.directory
+*.knownPackages
+*
+!/**/
+!LICENSE
+!*.*
