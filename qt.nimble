@@ -1,10 +1,10 @@
 version = "0.1.0"
 author = "Trey Cutter"
 description = "TODO"
-license = "LGPL-2.1"
+license = "Apache License 2.0"
 backend = "cpp"
 
-requires "nim >= 1.0.4"
+requires "nim >= 1.4.0"
 
 import strutils
 from os import walkDirRec

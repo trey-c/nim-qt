@@ -15,17 +15,16 @@
 
 include "core"
 
-# Private Qt API, and may cause future problems
 const qmetaobject = "QtCore/QMetaObject"
 
 type
   Access * {.header: qmetaobject,
-                importcpp: "Access".} = enum  
+                importcpp: "QMetaMethod::Access".} = enum  
            Private, Protected, Public
 
 type
   Attributes * {.header: qmetaobject,
-                importcpp: "Attributes".} = enum  
+                importcpp: "QMetaMethod::Attributes".} = enum  
           Compatibility, Cloned, Scriptable
 
 type
@@ -50,14 +49,11 @@ type
       RegisterPropertyMetaType, RegisterMethodArgumentMetaType
 
 type
-  AddMembers * {.importcpp: "AddMember", header: qmetaobject.} = enum
+  AddMembers * {.importcpp: "QMetaObject::AddMember", header: qmetaobject.} = enum
      ClassName, SuperClass, Methods, Signals, Slots,
      Constructors, Properties, Enumerators, ClassInfos, 
      RelatedMetaObjects, StaticMetacall, PublicMethods,
      ProtectedMethods, PrivateMethods, AllMembers, AllPrimaryMembers
 
 type
-  MetaObject * {.importcpp: "QMetaObject", header: qmetaobject, byRef, inheritable.} = object
-
-type
-  MetaObjectC * {.importcpp: "const QMetaObject *", header: qmetaobject, byRef, inheritable.} = object
+  QMetaObject * {.importcpp: "QMetaObject", header: qmetaobject, byRef, inheritable.} = object

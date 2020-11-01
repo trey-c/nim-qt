@@ -22,7 +22,11 @@ export
   construct,
   set_class_name,
   set_super_class,
-  to_meta_object
+  to_meta_object,
+  add_method,
+  add_slot,
+  add_signal,
+  add_property
 
 template init*(T: type QMetaObjectBuilder): QMetaObjectBuilder =
   T.construct()
@@ -31,10 +35,15 @@ export QMetaMethodBuilder
 export
   construct,
   parameter_names,
-  set_parameter_names
+  set_parameter_names,
+  set_access,
+  set_attributes,
+  set_return_type
 
-template init*(T: type QMetaMethodBuilder): QMetaMethodBuilder =
-  T.construct()
+export QMetaPropertyBuilder
+export 
+  set_writable,
+  set_constant
 
 when defined(testing) and is_main_module:
   import unittest

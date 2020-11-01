@@ -29,10 +29,6 @@ type
   QMetaMethodBuilder * {.header: qmetaobjectbuilder,
                       importcpp: "QMetaMethodBuilder".} = object
 
-proc construct*(T: type QMetaMethodBuilder): QMetaMethodBuilder {.
-    importcpp: "QMetaObjectBuilder(@)", constructor.}
-
-
 proc index*(
   self: QMetaMethodBuilder): cint {.
     no_side_effect,
@@ -69,18 +65,18 @@ proc set_tag*(
     value: QByteArray) {.
     importcpp: "setTag".}
 
-#proc access*(self: QMetaMethodBuilder): Access {.noSideEffect, importcpp: "access".}
+proc access*(self: QMetaMethodBuilder): Access {.noSideEffect, importcpp: "access".}
 
-#proc setAccess*(self: QMetaMethodBuilder; value: Access) {.importcpp: "setAccess".}
+proc setAccess*(self: QMetaMethodBuilder; value: Access) {.importcpp: "setAccess".}
 
 proc attributes*(
-  self: QMetaMethodBuilder): cint {.
+  self: QMetaMethodBuilder): Attributes {.
     no_side_effect,
     importcpp: "attributes".}
 
 proc set_attributes*(
   self: QMetaMethodBuilder;
-    value: cint) {.
+    value: Attributes) {.
     importcpp: "setAttributes".}
 
 proc revision*(
@@ -94,147 +90,144 @@ proc set_revision*(
     importcpp: "setRevision".}
 
 type
-  MetaPropertyBuilder * {.header: qmetaobjectbuilder,
+  QMetaPropertyBuilder * {.header: qmetaobjectbuilder,
                       importcpp: "QMetaPropertyBuilder".} = object
 
-proc init_qmeta_property_builder*(): MetaPropertyBuilder {.
-    importcpp: "QMetaPropertyBuilder()".}
-
 proc index*(
-  self: var MetaPropertyBuilder): cint {.
+  self: QMetaPropertyBuilder): cint {.
     no_side_effect,
     importcpp: "index".}
 
 proc name*(
-  self: var MetaPropertyBuilder): QByteArray {.
+  self: QMetaPropertyBuilder): QByteArray {.
     no_side_effect,
     importcpp: "name".}
 
-proc `type`*(self: var MetaPropertyBuilder): QByteArray {.
+proc `type`*(self: QMetaPropertyBuilder): QByteArray {.
     no_side_effect,
         importcpp: "type".}
 
-proc has_notify_signal*(self: var MetaPropertyBuilder): bool {.
+proc has_notify_signal*(self: QMetaPropertyBuilder): bool {.
     no_side_effect,
         importcpp: "hasNotifySignal".}
 
-proc notify_signal*(self: var MetaPropertyBuilder): QMetaMethodBuilder {.
+proc notify_signal*(self: QMetaPropertyBuilder): QMetaMethodBuilder {.
     no_side_effect,
         importcpp: "notifySignal".}
 
-proc set_notify_signal*(self: var MetaPropertyBuilder;
+proc set_notify_signal*(self: QMetaPropertyBuilder;
     value: QMetaMethodBuilder) {.
         importcpp: "setNotifySignal".}
 
-proc remove_notify_signal*(self: var MetaPropertyBuilder) {.
+proc remove_notify_signal*(self: QMetaPropertyBuilder) {.
     importcpp: "removeNotifySignal".}
 
-proc is_readable*(self: var MetaPropertyBuilder): bool {.
+proc is_readable*(self: QMetaPropertyBuilder): bool {.
     no_side_effect,
         importcpp: "isReadable".}
 
-proc is_writable*(self: var MetaPropertyBuilder): bool {.
+proc is_writable*(self: QMetaPropertyBuilder): bool {.
     no_side_effect,
         importcpp: "isWritable".}
 
-proc is_resettable*(self: var MetaPropertyBuilder): bool {.
+proc is_resettable*(self: QMetaPropertyBuilder): bool {.
     no_side_effect,
         importcpp: "isResettable".}
 
-proc is_designable*(self: var MetaPropertyBuilder): bool {.
+proc is_designable*(self: QMetaPropertyBuilder): bool {.
     no_side_effect,
         importcpp: "isDesignable".}
 
-proc is_scriptable*(self: var MetaPropertyBuilder): bool {.
+proc is_scriptable*(self: QMetaPropertyBuilder): bool {.
     no_side_effect,
         importcpp: "isScriptable".}
 
-proc is_stored*(self: var MetaPropertyBuilder): bool {.
+proc is_stored*(self: QMetaPropertyBuilder): bool {.
     no_side_effect,
         importcpp: "isStored".}
 
-proc is_editable*(self: var MetaPropertyBuilder): bool {.
+proc is_editable*(self: QMetaPropertyBuilder): bool {.
     no_side_effect,
         importcpp: "isEditable".}
 
-proc is_user*(self: var MetaPropertyBuilder): bool {.
+proc is_user*(self: QMetaPropertyBuilder): bool {.
     no_side_effect,
     importcpp: "isUser",
         header: "qmetaobjectbuilder_p.h".}
 
-proc has_std_set*(self: var MetaPropertyBuilder): bool {.
+proc has_std_set*(self: QMetaPropertyBuilder): bool {.
     no_side_effect,
         importcpp: "hasStdCppSet".}
 
-proc is_enum_or_flag*(self: var MetaPropertyBuilder): bool {.
+proc is_enum_or_flag*(self: QMetaPropertyBuilder): bool {.
     no_side_effect,
         importcpp: "isEnumOrFlag".}
 
-proc is_constant*(self: var MetaPropertyBuilder): bool {.
+proc is_constant*(self: QMetaPropertyBuilder): bool {.
     no_side_effect,
         importcpp: "isConstant".}
 
-proc is_final*(self: var MetaPropertyBuilder): bool {.
+proc is_final*(self: QMetaPropertyBuilder): bool {.
     no_side_effect,
     importcpp: "isFinal",
         header: "qmetaobjectbuilder_p.h".}
 
-proc set_readable*(self: var MetaPropertyBuilder;
+proc set_readable*(self: QMetaPropertyBuilder;
     value: bool) {.
         importcpp: "setReadable".}
 
-proc set_writable*(self: var MetaPropertyBuilder;
+proc set_writable*(self: QMetaPropertyBuilder;
     value: bool) {.
         importcpp: "setWritable".}
 
-proc set_resettable*(self: var MetaPropertyBuilder;
+proc set_resettable*(self: QMetaPropertyBuilder;
     value: bool) {.
         importcpp: "setResettable".}
 
-proc set_designable*(self: var MetaPropertyBuilder;
+proc set_designable*(self: QMetaPropertyBuilder;
     value: bool) {.
         importcpp: "setDesignable".}
 
-proc set_scriptable*(self: var MetaPropertyBuilder;
+proc set_scriptable*(self: QMetaPropertyBuilder;
     value: bool) {.
     importcpp: "setScriptable".}
 
-proc set_stored*(self: var MetaPropertyBuilder;
+proc set_stored*(self: QMetaPropertyBuilder;
     value: bool) {.
     importcpp: "setStored",
         header: "qmetaobjectbuilder_p.h".}
 
-proc set_editable*(self: var MetaPropertyBuilder;
+proc set_editable*(self: QMetaPropertyBuilder;
     value: bool) {.
         importcpp: "setEditable".}
 
 proc set_user*(
-  self: var MetaPropertyBuilder;
+  self: QMetaPropertyBuilder;
     value: bool) {.
     importcpp: "setUser".}
 
-proc set_std_set*(self: var MetaPropertyBuilder;
+proc set_std_set*(self: QMetaPropertyBuilder;
     value: bool) {.
         importcpp: "setStdCppSet".}
 
-proc set_enum_or_flag*(self: var MetaPropertyBuilder;
+proc set_enum_or_flag*(self: QMetaPropertyBuilder;
     value: bool) {.
         importcpp: "setEnumOrFlag".}
 
-proc set_constant*(self: var MetaPropertyBuilder;
+proc set_constant*(self: QMetaPropertyBuilder;
     value: bool) {.
         importcpp: "setConstant".}
 
 proc set_final*(
-  self: var MetaPropertyBuilder;
+  self: QMetaPropertyBuilder;
     value: bool) {.
         importcpp: "setFinal".}
 
-proc revision*(self: var MetaPropertyBuilder): cint {.
+proc revision*(self: QMetaPropertyBuilder): cint {.
     no_side_effect,
         importcpp: "revision".}
 
-proc set_revision*(self: var MetaPropertyBuilder;
+proc set_revision*(self: QMetaPropertyBuilder;
     revision: cint) {.
         importcpp: "setRevision".}
 
@@ -256,13 +249,13 @@ proc set_class_name*(
     importcpp: "setClassName".}
 
 proc super_class*(
-  self: QMetaObjectBuilder): MetaObject {.
+  self: QMetaObjectBuilder): QMetaObject{.
     no_side_effect,
     importcpp: "superClass".}
 
 proc set_super_class*(
   self: QMetaObjectBuilder;
-    meta: ptr MetaObject) {.
+    meta: ptr QMetaObject) {.
     importcpp: "setSuperClass".}
 
 proc method_count*(
@@ -332,11 +325,11 @@ proc add_property*(
   self: QMetaObjectBuilder;
     name: QByteArray;
     `type`: QByteArray;
-    notifier_id: cint = -1): MetaPropertyBuilder {.
+    notifier_id: cint = -1): QMetaPropertyBuilder {.
     importcpp: "addProperty".}
 
 proc add_property*(self: QMetaObjectBuilder; prototype: MetaProperty): 
-  MetaPropertyBuilder {.
+  QMetaPropertyBuilder {.
   importcpp: "addProperty".}
 
 #proc add_enumerator*(self: QMetaObjectBuilder;name: QByteArray): QMetaEnumBuilder {.importcpp: "addEnumerator".}
@@ -351,11 +344,11 @@ proc add_class_info*(
 
 proc add_related_meta_object*(
   self: QMetaObjectBuilder;
-    meta: MetaObject): cint {.
+    meta: QMetaObject): cint {.
     importcpp: "addRelatedMetaObject".}
 
 proc add_meta_object*(
-  self: QMetaObjectBuilder;prototype: MetaObject;
+  self: QMetaObjectBuilder;prototype: QMetaObject;
     members: AddMembers = AllMembers) {.
     importcpp: "addMetaObject".}
 
@@ -367,7 +360,7 @@ proc `method`*(
 
 proc property*(
   self: QMetaObjectBuilder;
-    index: cint): MetaPropertyBuilder {.
+    index: cint): QMetaPropertyBuilder {.
     no_side_effect,
     importcpp: "property".}
 
@@ -375,7 +368,7 @@ proc property*(
 
 proc related_meta_object*(
   self: QMetaObjectBuilder;
-    index: cint): MetaObject {.
+    index: cint): QMetaObject{.
     no_side_effect,
     importcpp: "relatedMetaObject".}
 
@@ -461,7 +454,7 @@ proc index_of_class_info*(
 #proc setStaticMetacallFunction*(self: QMetaObjectBuilder; value: StaticMetacallFunction) {.importcpp: "setStaticMetacallFunction".}
 
 proc to_meta_object*(
-  self: QMetaObjectBuilder): ptr MetaObject {.
+  self: QMetaObjectBuilder): ptr QMetaObject{.
     no_side_effect,
     importcpp: "toMetaObject".}
 
@@ -472,8 +465,8 @@ proc to_relocatable_data*(
     importcpp: "toRelocatableData".}
 
 proc from_relocatable_data*(
-  a1: MetaObject;
-    a2: MetaObject;
+  a1: QMetaObject;
+    a2: QMetaObject;
     a3: QByteArray) {.
     importcpp: "QMetaObjectBuilder::fromRelocatableData(@)".}
 

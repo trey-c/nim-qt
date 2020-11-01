@@ -14,8 +14,7 @@
 # limitations under the License.
 
 import "../private/core/object"
-import "../private/core/metaobject"
-import qbytearray, qstring, strutils, qlist
+import qbytearray, qstring, strutils, qlist, qmetaobject
 
 import qmetaobjectbuilder
 import macros
@@ -28,17 +27,27 @@ export
   meta_object,
   qobjectmetaobject
 
-template static_meta_object*(T: type QObject): MetaObject =
+template static_meta_object*(T: type QObject): QMetaObject =
   qobjectmetaobject
 
 type
   Members = seq[tuple[name: string, typename: string]]
+  MetaTypes = enum
+    Slot, Signal, Method
 
-proc build_meta_method(name, retrn: string, params: seq[tuple[name, typename: string]]): NimNode =
+proc build_meta_property(builder: NimNode, name, typename: string): NimNode =
+  var propertybuilder = new_ident_node(name & "_builder")
+  result = quote do:
+    var `propertybuilder` = `builder`.add_property(QByteArray.init(`name`), 
+                            QByteArray.init(`typename`))
+    `propertybuilder`.set_constant(false)
+    `propertybuilder`.set_writable(true)
+
+proc build_meta_method(builder: NimNode, name, signature, retrn: string, params: seq[tuple[name, typename: string]], metatype: MetaTypes): NimNode =
   var 
     param_list = new_stmt_list()
     list = new_ident_node(name & "_list")
-    builder = new_ident_node(name & "_builder") 
+    methodbuilder = new_ident_node(name & "_builder") 
   for param in params:
     var
       name = param.name
@@ -46,10 +55,21 @@ proc build_meta_method(name, retrn: string, params: seq[tuple[name, typename: st
           `list`.append(QByteArray.init(`name`))
     param_list.add(stmt)
 
+  let metamethod = case metatype
+  of Slot:
+    new_ident_node("add_slot")
+  of Signal:
+    new_ident_node("add_signal")
+  of Method:
+    new_ident_node("add_method")
   result = quote do:
-    var `builder` = QMetaObjectBuilder.init()
+    var `methodbuilder` = builder.`metamethod`(QByteArray.init(`signature`))
     var `list`: QList[QByteArray]
     `param_list`
+    `methodbuilder`.set_parameter_names(`list`)
+    `methodbuilder`.set_access(Public)
+    `methodbuilder`.set_attributes(Scriptable)
+    `methodbuilder`.set_return_type(QByteArray.init(`retrn`))
 
 proc extract_method(prc: NimNode, name, retrn: var string, params: var seq[tuple[name, typename: string]]
 ): NimNode =
@@ -57,28 +77,29 @@ proc extract_method(prc: NimNode, name, retrn: var string, params: var seq[tuple
     name = prc[0][1].str_val
   elif prc[0].kind == nnkIdent:
     name = prc[0].str_val
-
   retrn = "void"
+
   for node in prc[3]:
     if node.kind == nnkEmpty:
       continue
-    
     if node.kind == nnkIdent:
       retrn = node.str_val
+    
     elif node[0].kind == nnkIdent and node[2].kind == nnkEmpty:
-      params.add((name: node[0].str_val, typename: node[0].str_val))
+      params.add((name: node[0].str_val, typename: node[1].str_val))
     elif node[0].kind == nnkIdent and node[2].kind == nnkIdent: 
-      var i = 0
+      var k = 0
       var typename = node[node.len - 2].str_val
       for ident in node:
-        i.inc
-        if i == node.len - 1:
+        k.inc
+        if k == node.len - 1:
           break
         elif ident.kind == nnkEmpty:
           continue
         params.add((name: ident.str_val, typename: typename))
+  result = prc
 
-proc build_metaobj_def(name, base_name: string, params: NimNode): NimNode =
+proc build_metaobj_def(name, base_name: string, builder, builderstmt: NimNode): NimNode =
   var 
     metaobj = new_ident_node(name & "_meta_object")
     build_metaobj = new_ident_node("build_" & name & "_meta_object")
@@ -86,38 +107,73 @@ proc build_metaobj_def(name, base_name: string, params: NimNode): NimNode =
     base_ident = new_ident_node(base_name)
     
   result = quote do:
-    proc `build_metaobj`(T: type `name_ident`): MetaObject =
-      var builder = QMetaObjectBuilder.init()
-      builder.set_class_name(QByteArray.init(`name`))
-      builder.set_super_class(cast[ptr MetaObject](`base_ident`.static_meta_object()))
-      `params`
-      var res = builder.to_meta_object()
-      result = res[]
+    proc `build_metaobj`(T: type `name_ident`): QMetaObject =
+      var `builder` = QMetaObjectBuilder.init()
+      `builder`.set_class_name(QByteArray.init(`name`))
+      `builder`.set_super_class(cast[ptr QMetaObject](`base_ident`.static_meta_object()))
+      `builderstmt`
+      result = builder.to_meta_object()[]
     
     let `metaobj` = `name_ident`.`build_metaobj`()
-    proc static_meta_object*(self: type `name_ident`): MetaObject =
+    proc static_meta_object*(self: type `name_ident`): QMetaObject =
       result = `metaobj`
     
-    proc meta_object*(self: `name_ident`): ptr MetaObject =
-      return cast[ptr MetaObject](`metaobj`)
+    proc meta_object*(self: `name_ident`): ptr QMetaObject =
+      return cast[ptr QMetaObject](`metaobj`)
 
-proc register_qobject_by_call(call, methods, metamethods: NimNode, members: var Members) =
+proc create_method_signature(name, ignore: string, args: seq[tuple[name, typename: string]]): string =
+  result = name & "("
+  var 
+    i = 0
+    nignored = 0
+  for arg in args:
+    if arg.typename == ignore:
+      nignored.inc
+      continue
+    
+    result = result & arg.typename
+    if (i < args.len - 1 - nignored):
+      result = result & ","
+    if (i != args.len - 1 - nignored):
+      result = result & " "
+    i.inc
+  result = result & ")"
+
+proc register_qobject_method(builder, prc: NimNode, name: string, metatype: MetaTypes): NimNode =
+  var 
+    methodname = ""
+    retrn = ""
+    ps: seq[tuple[name, typename: string]]
+  result = extract_method(prc, methodname, retrn, ps)
+
+  var signature = create_method_signature(methodname, name, ps)
+  builder.add(build_meta_method(builder, methodname, signature, retrn, ps, metatype))
+
+proc register_qobject_by_call(name: string, call, methods, builder, builderstmt: NimNode, members: var Members) =
   case call[0].str_val:
     of "q_props":
       for node in call[1]:
+        builderstmt.add(build_meta_property(builder, node[0].str_val, node[1][0].str_val))
         members.add((name: node[0].str_val, typename: node[1][0].str_val))
     of "q_signals":
-      echo "sdf"
+      assert call[1].kind == nnkStmtList
+      for prc in call[1]:
+        assert prc.kind == nnkProcDef
+        assert prc[6].kind == nnkEmpty
+        var 
+          p = register_qobject_method(builderstmt, prc, name, MetaTypes.Signal)
+          signalmessage = "Emiting signal: " & p[0].str_val
+
+        p[6] = quote do:
+          echo `signalmessage`
+        methods.add(p)
     of "q_slots":
       assert call[1].kind == nnkStmtList
       for prc in call[1]:
-        var 
-          slot_name = ""
-          retrn = ""
-          ps: seq[tuple[name, typename: string]]
-        discard extract_method(prc, slot_name, retrn, ps)
-        metamethods.add(build_meta_method(slot_name, retrn, ps))
-        methods.add(prc)
+        assert prc.kind == nnkProcDef
+        assert prc[6].kind != nnkEmpty
+        
+        methods.add(register_qobject_method(builderstmt, prc, name, MetaTypes.Slot))
     of "q_ignore":
       for node in call[1]:
         if node.kind == nnkProcDef:
@@ -125,6 +181,7 @@ proc register_qobject_by_call(call, methods, metamethods: NimNode, members: var 
           continue
         elif node.kind != nnkCall:
           continue
+        
         members.add((name: node[0].str_val, typename: node[1][0].str_val))
     else:
       echo "Unknown q_meta" 
@@ -168,19 +225,20 @@ macro declare_qobject*(name, base_name: string, body: untyped): untyped =
   var 
     members: Members = @[]
     methods = new_stmt_list()
-    metamethods = new_stmt_list()
+    builder = new_ident_node("builder")
+    builderstmt = new_stmt_list()
   for b in body:
     assert b.kind == nnkCall
     assert b[0].kind == nnkIdent
     assert b[1].kind == nnkStmtList
-    register_qobject_by_call(b, methods, metamethods, members)
+    register_qobject_by_call(name.str_val, b, methods, builder, builderstmt, members)
   
   var 
     qtype = declare_type(name.str_val, base_name.str_val, members)
-    build_metaobj = build_metaobj_def(name.str_val, base_name.str_val, metamethods)
+    build_metaobj = build_metaobj_def(name.str_val, base_name.str_val, builder, builderstmt)
     typename = new_ident_node(name.str_val)
   result = quote do:
-    import qmetaobjectbuilder, qlist, qbytearray, qstring
+    import qmetaobjectbuilder, qlist, qbytearray, qstring, qmetaobject
     `qtype` 
     `methods`
     

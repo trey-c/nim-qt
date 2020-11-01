@@ -15,6 +15,8 @@
 
 import "../private/core/metaobject.nim"
 
-type
-  QMetaObject *
-    = ref object of RootObj
+export QMetaObject
+
+export
+  Access,
+  Attributes

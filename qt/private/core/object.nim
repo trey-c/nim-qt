@@ -29,8 +29,8 @@ proc delete_later*(self: QObject) {.
 
 proc qt_metacall*(self: QObject, call: QMetaObjectCall, index: cint, args: ptr pointer): cint {.importcpp: "qt_metacall".}
 
-proc meta_object*(self: QObject): ptr MetaObject {.importcpp: "metaObject".}
+proc meta_object*(self: QObject): ptr QMetaObject {.importcpp: "metaObject".}
 
-let qobjectmetaobject* {.importcpp: "QObject::staticMetaObject", nodecl.}: MetaObject
+let qobjectmetaobject* {.importcpp: "QObject::staticMetaObject", nodecl.}: QMetaObject
 
   
